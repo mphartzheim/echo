@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Echo Location WX</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div id="app-container">
+    <header>
+      <h1>Echo Location WX</h1>
+    </header>
+
+    <!-- Search Bar -->
+    <div id="search-bar">
+      <input type="text" id="locationSearch" placeholder="Search for a location..." />
+      <button onclick="searchLocation()">Search</button>
+    </div>
+
+    <div id="main-container">
+      <!-- Left Panel: Pinned Locations -->
+      <div id="left-panel">
+        <h2>Pinned Locations</h2>
+        <input type="text" id="favoriteSearch" placeholder="Search favorites..." />
+        <div id="favorites"></div>
+      </div>
+
+      <!-- Center Panel: Map -->
+      <div id="center-panel">
+        <div id="map"></div>
+      </div>
+
+      <!-- Right Panel: Forecast -->
+      <div id="right-panel">
+        <h2 class="forecast-header">
+          Forecast
+          <button id="copy-forecast-btn" onclick="copyForecast()" title="Copy Forecast">📋</button>
+        </h2>              
+        <div id="forecast-location" class="subheader"></div>
+        <div id="current-conditions" class="subheader"></div>
+        <div id="forecast">
+          <div id="forecast-loading" class="spinner hidden"></div>
+        </div>
+      </div>      
+      
+    </div>
+
+    <!-- Bottom Panel: Active Alerts -->
+    <div id="bottom-panel">
+      <h2 class="alerts-header">
+        Active Alerts
+        <button id="copy-alerts-btn" onclick="copyAlerts()" title="Copy Alerts">📋</button>
+      </h2>      
+      <div id="alerts"></div>
+    </div>
+
+    <!-- Pin Button -->
+    <button id="pin-btn" onclick="pinCurrentLocation()">Pin This Location</button>
+  </div>
+
+  <!-- Load Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Load SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- Load your renderer script -->
+  <script type="module" src="app.js"></script>
+</body>
+
+</html>
