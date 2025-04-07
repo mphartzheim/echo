@@ -5,7 +5,7 @@
 
 **Echo Location WX** is a sleek, cross-platform desktop weather app that provides real-time forecasts, alerts, and radar links for any clicked location on the map. Built with Electron, Leaflet, and NWS APIs, it’s fast, informative, and customizable — a weather dashboard built for power users and casual browsers alike.
 
-![Echo Location WX Banner](assets/images/Echo_Location_WX_2.png)
+![Echo Location WX Banner](assets/images/Echo_Location_WX_2_white.png)
 
 ## 🚀 Features
 
