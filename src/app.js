@@ -34,23 +34,61 @@ window.addEventListener('DOMContentLoaded', async () => {
   map.on('click', async function (e) {
     console.log('Map clicked:', e.latlng);
     selectedLocation = e.latlng;
-
-    forecastDiv.innerHTML = '';
+  
+    // Ensure the spinner exists.
+    let spinner = document.getElementById('forecast-loading');
+    if (!spinner) {
+      spinner = document.createElement('div');
+      spinner.id = 'forecast-loading';
+      spinner.classList.add('spinner', 'hidden');
+      forecastDiv.prepend(spinner);
+      console.log("Spinner recreated.");
+    }
+  
+    // Clear forecastDiv while preserving the spinner element.
+    Array.from(forecastDiv.children).forEach(child => {
+      if (child.id !== 'forecast-loading') {
+        child.remove();
+      }
+    });
+    // Clear alerts normally.
     alertsDiv.innerHTML = '';
+  
+    // Show spinner.
     spinner.classList.remove("hidden");
-
+    console.log("Spinner should be visible now.", spinner);
+  
+    // Remove any existing marker.
     if (currentMarker) {
       map.removeLayer(currentMarker);
+      console.log("Existing marker removed.");
     }
-
+  
     try {
       currentMarker = L.marker([selectedLocation.lat, selectedLocation.lng]).addTo(map);
-
+      console.log("Marker added at:", selectedLocation);
+  
+      // Force browser to repaint the spinner.
+      await new Promise(resolve => {
+        console.log("Starting spinner delay...");
+        setTimeout(() => {
+          console.log("Spinner delay complete.");
+          resolve();
+        }, 0);
+      });
+  
       const weatherForecast = await window.api.fetchWeather(selectedLocation.lat, selectedLocation.lng);
+      console.log("Weather forecast data received:", weatherForecast);
+  
       const activeAlerts = await window.api.fetchAlerts(selectedLocation.lat, selectedLocation.lng);
+      console.log("Active alerts data received:", activeAlerts);
+  
       await updateForecastHeaderWithLocation(selectedLocation.lat, selectedLocation.lng);
+      console.log("Forecast header updated.");
       await updateCurrentConditions(selectedLocation.lat, selectedLocation.lng);
-
+      console.log("Current conditions updated.");
+  
+      // Append new forecast content without overwriting the spinner.
       if (weatherForecast?.length) {
         const forecastHtml = weatherForecast.map(period => `
           <div>
@@ -58,9 +96,13 @@ window.addEventListener('DOMContentLoaded', async () => {
             <p>${period.detailedForecast}</p>
           </div>
         `).join('');
-        forecastDiv.innerHTML = `<h3>🌤️ 7-Day Forecast</h3>${forecastHtml}`;
+        // Append forecast content after the spinner.
+        forecastDiv.insertAdjacentHTML('beforeend', `<h3>🌤️ 7-Day Forecast</h3>${forecastHtml}`);
+        console.log("Forecast rendered.");
+      } else {
+        console.log("No weather forecast data available.");
       }
-
+  
       if (activeAlerts?.length) {
         const alertsHtml = activeAlerts.map(alert => `
           <div>
@@ -68,15 +110,18 @@ window.addEventListener('DOMContentLoaded', async () => {
             <p>${alert.properties.description}</p>
           </div>
         `).join('');
-        alertsDiv.innerHTML = `<h3></h3>${alertsHtml}`;
+        alertsDiv.innerHTML = `<h3>Active Alerts</h3>${alertsHtml}`;
+        console.log("Alerts rendered.");
+      } else {
+        console.log("No active alerts data available.");
       }
-
     } catch (err) {
       console.error('Error fetching weather or alerts:', err);
     } finally {
       spinner.classList.add("hidden");
+      console.log("Spinner hidden.");
     }
-  });
+  });  
 
   // Wire up search box and favorite search
   document.getElementById("locationSearch").addEventListener("keydown", function (event) {
@@ -129,7 +174,23 @@ window.goToFavorite = async function (lat, lng) {
 
   const forecastDiv = document.getElementById('forecast');
   const alertsDiv = document.getElementById('alerts');
-  forecastDiv.innerHTML = '';
+
+  // Ensure the spinner exists; if not, create it and prepend to forecastDiv.
+  let spinner = document.getElementById('forecast-loading');
+  if (!spinner) {
+    spinner = document.createElement('div');
+    spinner.id = 'forecast-loading';
+    spinner.classList.add('spinner', 'hidden');
+    forecastDiv.prepend(spinner);
+  }
+
+  // Remove all forecast content except the spinner.
+  Array.from(forecastDiv.children).forEach(child => {
+    if (child.id !== 'forecast-loading') {
+      child.remove();
+    }
+  });
+  // Clear alerts container normally.
   alertsDiv.innerHTML = '';
 
   if (currentMarker) {
@@ -137,6 +198,11 @@ window.goToFavorite = async function (lat, lng) {
   }
 
   currentMarker = L.marker([lat, lng]).addTo(map);
+
+  // Show the spinner.
+  spinner.classList.remove("hidden");
+  // Force a repaint by yielding to the event loop.
+  await new Promise(resolve => setTimeout(resolve, 0));
 
   try {
     const weatherForecast = await window.api.fetchWeather(lat, lng);
@@ -151,7 +217,8 @@ window.goToFavorite = async function (lat, lng) {
           <p>${period.detailedForecast}</p>
         </div>
       `).join('');
-      forecastDiv.innerHTML = `<h3>🌤️ 7-Day Forecast</h3>${forecastHtml}`;
+      // Append the new forecast content after the spinner.
+      forecastDiv.insertAdjacentHTML('beforeend', `<h3>🌤️ 7-Day Forecast</h3>${forecastHtml}`);
     }
 
     if (activeAlerts?.length) {
@@ -161,10 +228,13 @@ window.goToFavorite = async function (lat, lng) {
           <p>${alert.properties.description}</p>
         </div>
       `).join('');
-      alertsDiv.innerHTML = `<h3></h3>${alertsHtml}`;
+      alertsDiv.innerHTML = `<h3>Active Alerts</h3>${alertsHtml}`;
     }
   } catch (err) {
     console.error('Error fetching weather or alerts for favorite:', err);
+  } finally {
+    // Hide the spinner.
+    spinner.classList.add("hidden");
   }
 };
 
