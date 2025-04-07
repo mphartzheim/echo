@@ -53,13 +53,6 @@ function createWindow() {
     mainWindow.hide();
   });
 
-  mainWindow.on('close', (event) => {
-    if (!isQuiting) {
-      event.preventDefault();
-      mainWindow.hide();
-    }
-  });
-
   // Set up tray icon and menu
   const iconPath = path.join(__dirname, '../assets/icons/Grimace28.png');
   tray = new Tray(iconPath);
