@@ -326,6 +326,30 @@ window.searchLocation = async function () {
   const query = input.value.trim();
   if (!query) return;
 
+  const forecastDiv = document.getElementById('forecast');
+  const alertsDiv = document.getElementById('alerts');
+
+  // Create or grab the spinner.
+  let spinner = document.getElementById('forecast-loading');
+  if (!spinner) {
+    spinner = document.createElement('div');
+    spinner.id = 'forecast-loading';
+    spinner.classList.add('spinner', 'hidden');
+    forecastDiv.prepend(spinner);
+  }
+
+  // Clear forecastDiv while preserving the spinner.
+  Array.from(forecastDiv.children).forEach(child => {
+    if (child.id !== 'forecast-loading') {
+      child.remove();
+    }
+  });
+  // Clear alerts.
+  alertsDiv.innerHTML = '';
+
+  // Show the spinner.
+  spinner.classList.remove("hidden");
+
   const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`;
 
   try {
@@ -343,15 +367,13 @@ window.searchLocation = async function () {
       }
       currentMarker = L.marker([lat, lon]).addTo(map);
 
+      // Optionally, force a repaint with a short delay.
+      await new Promise(resolve => setTimeout(resolve, 0));
+
       const weatherForecast = await window.api.fetchWeather(lat, lon);
       const activeAlerts = await window.api.fetchAlerts(lat, lon);
       await updateForecastHeaderWithLocation(lat, lon);
       await updateCurrentConditions(lat, lon);
-
-      const forecastDiv = document.getElementById('forecast');
-      const alertsDiv = document.getElementById('alerts');
-      forecastDiv.innerHTML = '';
-      alertsDiv.innerHTML = '';
 
       if (weatherForecast?.length) {
         const forecastHtml = weatherForecast.map(period => `
@@ -360,7 +382,8 @@ window.searchLocation = async function () {
             <p>${period.detailedForecast}</p>
           </div>
         `).join('');
-        forecastDiv.innerHTML = `<h3>🌤️ 7-Day Forecast</h3>${forecastHtml}`;
+        // Append forecast content after the spinner.
+        spinner.insertAdjacentHTML('afterend', `<h3>🌤️ 7-Day Forecast</h3>${forecastHtml}`);
       }
 
       if (activeAlerts?.length) {
@@ -370,7 +393,7 @@ window.searchLocation = async function () {
             <p>${alert.properties.description}</p>
           </div>
         `).join('');
-        alertsDiv.innerHTML = `<h3></h3>${alertsHtml}`;
+        alertsDiv.innerHTML = `<h3>Active Alerts</h3>${alertsHtml}`;
       }
     } else {
       alert("Location not found.");
@@ -378,6 +401,9 @@ window.searchLocation = async function () {
   } catch (err) {
     console.error('Error searching location:', err);
     alert("Error searching for location.");
+  } finally {
+    // Hide the spinner when done.
+    spinner.classList.add("hidden");
   }
 };
 
