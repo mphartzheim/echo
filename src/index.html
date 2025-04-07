@@ -8,13 +8,23 @@
   <link rel="icon" href="../assets/icons/translogocolor.ico" type="image/x-icon">
   <link rel="apple-touch-icon" href="../assets/icons/translogocolor.png">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/header.css">
+  <link rel="stylesheet" href="css/search.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/panels.css">
+  <link rel="stylesheet" href="css/favorites.css">
+  <link rel="stylesheet" href="css/spinner.css">
+  <link rel="stylesheet" href="css/darkmode.css">
 </head>
 
 <body>
   <div id="app-container">
     <header>
-      <img src="../assets/images/Echo_Location_WX_2.png" alt="Echo Location WX Banner" class="header-banner" />
+      <img src="../assets/images/Echo_Location_WX_2.png" alt="Echo Location WX Banner" class="header-banner light" />
+      <img src="../assets/images/Echo_Location_WX_2_white.png" alt="Echo Location WX Banner" class="header-banner dark" />
+      <button class="dark-mode-toggle" id="toggleDarkMode">🌙</button>
     </header>
 
     <!-- Search Bar -->

@@ -137,6 +137,30 @@ window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById("favoriteSearch").addEventListener("input", () => {
     renderFavorites(currentFavorites);
   });
+
+  // Dark Mode Toggle
+  const darkModeToggleButton = document.getElementById('toggleDarkMode');
+  if (darkModeToggleButton) {
+    // Check localStorage for saved theme preference
+    if (localStorage.getItem("dark-mode") === "enabled") {
+      document.body.classList.add("dark-mode");
+      darkModeToggleButton.textContent = "☀️"; // Sun icon for dark mode
+    } else {
+      darkModeToggleButton.textContent = "🌙"; // Moon icon for light mode
+    }
+
+    darkModeToggleButton.addEventListener("click", function() {
+      document.body.classList.toggle("dark-mode");
+
+      if (document.body.classList.contains("dark-mode")) {
+        localStorage.setItem("dark-mode", "enabled");
+        darkModeToggleButton.textContent = "☀️";
+      } else {
+        localStorage.setItem("dark-mode", "disabled");
+        darkModeToggleButton.textContent = "🌙";
+      }
+    });
+  }
 });
 
 // Render favorites
