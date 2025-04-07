@@ -1,9 +1,10 @@
-import { updateForecastHeaderWithLocation, updateCurrentConditions, cToF } from './forecast.js';
+import { fetchPointData, updateForecastHeaderWithPointData, updateCurrentConditionsWithPointData } from './forecast.js';
 import { renderFavorites, pinCurrentLocation, editFavorite, deleteFavorite } from './favorites.js';
 import { updateRadarLayer } from './radar.js';
 import { copyForecastLimited, copyAlerts } from './clipboard.js';
 import { searchLocation } from './search.js';
 import { openSpcWindow } from './spc.js';
+import { renderForecastToContainer, renderAlertsToContainer } from './render.js';
 
 // Global variables
 let map;
@@ -102,38 +103,17 @@ window.addEventListener('DOMContentLoaded', async () => {
       const activeAlerts = await window.api.fetchAlerts(selectedLocation.lat, selectedLocation.lng);
       console.log("Active alerts data received:", activeAlerts);
 
-      await updateForecastHeaderWithLocation(selectedLocation.lat, selectedLocation.lng);
-      console.log("Forecast header updated.");
-      await updateCurrentConditions(selectedLocation.lat, selectedLocation.lng);
-      console.log("Current conditions updated.");
+      const pointData = await fetchPointData(selectedLocation.lat, selectedLocation.lng);
+
+      await Promise.all([
+        updateForecastHeaderWithPointData(pointData).then(() => console.log("Forecast header updated.")),
+        updateCurrentConditionsWithPointData(pointData).then(() => console.log("Current conditions updated."))
+      ]);
 
       // Append new forecast content without overwriting the spinner.
-      if (weatherForecast?.length) {
-        const forecastHtml = weatherForecast.map(period => `
-          <div>
-            <strong>${period.name}:</strong>
-            <p>${period.detailedForecast}</p>
-          </div>
-        `).join('');
-        // Append forecast content after the spinner.
-        forecastDiv.insertAdjacentHTML('beforeend', `<h3>🌤️ 7-Day Forecast</h3>${forecastHtml}`);
-        console.log("Forecast rendered.");
-      } else {
-        console.log("No weather forecast data available.");
-      }
+      renderForecastToContainer(forecastDiv, weatherForecast);
+      renderAlertsToContainer(alertsDiv, activeAlerts);
 
-      if (activeAlerts?.length) {
-        const alertsHtml = activeAlerts.map(alert => `
-          <div>
-            <strong>${alert.properties.headline}</strong>
-            <p>${alert.properties.description}</p>
-          </div>
-        `).join('');
-        alertsDiv.innerHTML = `<h3>Active Alerts</h3>${alertsHtml}`;
-        console.log("Alerts rendered.");
-      } else {
-        console.log("No active alerts data available.");
-      }
     } catch (err) {
       console.error('Error fetching weather or alerts:', err);
     } finally {
@@ -147,35 +127,12 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (event.key === "Enter") {
       event.preventDefault();
 
+      // Only needs to set selectedLocation now — everything else happens inside search.js
       window.searchLocation = () =>
         searchLocation(
           map,
           { value: currentMarker },
-          (lat, lon) => { selectedLocation = { lat, lng: lon }; },
-          (el, forecast) => {
-            if (forecast?.length) {
-              const html = forecast.map(p => `
-                <div>
-                  <strong>${p.name}:</strong>
-                  <p>${p.detailedForecast}</p>
-                </div>
-              `).join('');
-              el.insertAdjacentHTML('afterend', `<h3>🌤️ 7-Day Forecast</h3>${html}`);
-            }
-          },
-          (el, alerts) => {
-            if (alerts?.length) {
-              const html = alerts.map(alert => `
-                <div>
-                  <strong>${alert.properties.headline}</strong>
-                  <p>${alert.properties.description}</p>
-                </div>
-              `).join('');
-              el.innerHTML = `<h3>Active Alerts</h3>${html}`;
-            }
-          },
-          updateForecastHeaderWithLocation,
-          updateCurrentConditions
+          (lat, lon) => { selectedLocation = { lat, lng: lon }; }
         );
 
       window.searchLocation(); // Trigger search immediately
@@ -251,29 +208,15 @@ window.goToFavorite = async function (lat, lng) {
   try {
     const weatherForecast = await window.api.fetchWeather(lat, lng);
     const activeAlerts = await window.api.fetchAlerts(lat, lng);
-    await updateForecastHeaderWithLocation(lat, lng);
-    await updateCurrentConditions(lat, lng);
+    const pointData = await fetchPointData(lat, lng);
+    await Promise.all([
+      updateForecastHeaderWithPointData(pointData),
+      updateCurrentConditionsWithPointData(pointData)
+    ]);
 
-    if (weatherForecast?.length) {
-      const forecastHtml = weatherForecast.map(period => `
-        <div>
-          <strong>${period.name}:</strong>
-          <p>${period.detailedForecast}</p>
-        </div>
-      `).join('');
-      // Append the new forecast content after the spinner.
-      forecastDiv.insertAdjacentHTML('beforeend', `<h3>🌤️ 7-Day Forecast</h3>${forecastHtml}`);
-    }
+    renderForecastToContainer(forecastDiv, weatherForecast);
+    renderAlertsToContainer(alertsDiv, activeAlerts);
 
-    if (activeAlerts?.length) {
-      const alertsHtml = activeAlerts.map(alert => `
-        <div>
-          <strong>${alert.properties.headline}</strong>
-          <p>${alert.properties.description}</p>
-        </div>
-      `).join('');
-      alertsDiv.innerHTML = `<h3>Active Alerts</h3>${alertsHtml}`;
-    }
   } catch (err) {
     console.error('Error fetching weather or alerts for favorite:', err);
   } finally {
