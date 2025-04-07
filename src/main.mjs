@@ -23,6 +23,7 @@ function createWindow() {
     height: 1024,
     minWidth: 1280,
     minHeight: 1024,
+    autoHideMenuBar: true,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,

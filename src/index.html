@@ -46,8 +46,10 @@
       <div id="right-panel">
         <h2 class="forecast-header">
           Forecast
-          <button id="copy-forecast-btn" onclick="copyForecast()" title="Copy Forecast">📋</button>
-        </h2>
+          <button id="copy-forecast-btn" onclick="copyForecastAll()" title="Copy Full Forecast">📋</button>
+          <button id="copy-forecast-btn" onclick="copyForecast3()" title="Copy 3-Day Forecast">3️⃣</button>
+          <button id="copy-forecast-btn" onclick="copyForecast5()" title="Copy 5-Day Forecast">5️⃣</button>
+        </h2>        
         <div id="forecast-location" class="subheader"></div>
         <div id="current-conditions" class="subheader"></div>
         <div id="forecast">

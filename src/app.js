@@ -421,13 +421,25 @@ function cToF(celsius) {
   return (celsius * 9) / 5 + 32;
 }
 
-window.copyForecast = function () {
+window.copyForecast3 = function () {
+  copyForecastLimited(3);
+};
+
+window.copyForecast5 = function () {
+  copyForecastLimited(5);
+};
+
+window.copyForecastAll = function () {
+  copyForecastLimited(7);
+};
+
+function copyForecastLimited(limit) {
   const forecastEl = document.getElementById("forecast");
   if (!forecastEl) return;
 
   const lines = [];
 
-  Array.from(forecastEl.children).forEach(item => {
+  Array.from(forecastEl.children).slice(0, limit*2+2).forEach(item => {
     const boldEl = item.querySelector("b");
     let label = "";
     let description = "";
@@ -435,7 +447,6 @@ window.copyForecast = function () {
     if (boldEl) {
       label = boldEl.textContent.trim().replace(/:$/, "");
 
-      // Collect everything *after* the bold element
       let contentParts = [];
       let currentNode = boldEl.nextSibling;
 
@@ -451,7 +462,6 @@ window.copyForecast = function () {
       description = contentParts.join(" ").replace(/\s+/g, " ").trim();
       lines.push(`${label}: ${description}`);
     } else {
-      // No bold element, just use the whole text
       const raw = item.textContent.trim().replace(/\s+/g, " ");
       if (raw) lines.push(raw);
     }
@@ -464,7 +474,7 @@ window.copyForecast = function () {
       Swal.fire({
         icon: 'success',
         title: 'Copied!',
-        text: 'Forecast text copied to clipboard.',
+        text: `Copied ${limit}-day forecast to clipboard.`,
         timer: 1500,
         showConfirmButton: false
       });
@@ -477,7 +487,7 @@ window.copyForecast = function () {
         text: 'Could not copy forecast. Try again.',
       });
     });
-};
+}
 
 window.copyAlerts = function () {
   const alertsEl = document.getElementById("alerts");
@@ -568,7 +578,7 @@ async function updateRadarLayer() {
   }
 }
 
-window.openSpcWindow = function(day) {
+window.openSpcWindow = function (day) {
   const links = {
     day1: 'https://www.spc.noaa.gov/products/outlook/day1otlk.html',
     day2: 'https://www.spc.noaa.gov/products/outlook/day2otlk.html',
