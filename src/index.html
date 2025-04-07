@@ -5,6 +5,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Echo Location WX</title>
+  <link rel="icon" href="../assets/icons/translogocolor.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="../assets/icons/translogocolor.png">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -12,7 +14,7 @@
 <body>
   <div id="app-container">
     <header>
-      <h1>Echo Location WX</h1>
+      <img src="../assets/images/Echo_Location_WX_2.png" alt="Echo Location WX Banner" class="header-banner" />
     </header>
 
     <!-- Search Bar -->
@@ -49,7 +51,7 @@
           <button id="copy-forecast-btn" onclick="copyForecastAll()" title="Copy Full Forecast">📋</button>
           <button id="copy-forecast-btn" onclick="copyForecast3()" title="Copy 3-Day Forecast">3️⃣</button>
           <button id="copy-forecast-btn" onclick="copyForecast5()" title="Copy 5-Day Forecast">5️⃣</button>
-        </h2>        
+        </h2>
         <div id="forecast-location" class="subheader"></div>
         <div id="current-conditions" class="subheader"></div>
         <div id="forecast">
