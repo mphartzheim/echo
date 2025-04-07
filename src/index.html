@@ -23,7 +23,8 @@
   <div id="app-container">
     <header>
       <img src="../assets/images/Echo_Location_WX_2.png" alt="Echo Location WX Banner" class="header-banner light" />
-      <img src="../assets/images/Echo_Location_WX_2_white.png" alt="Echo Location WX Banner" class="header-banner dark" />
+      <img src="../assets/images/Echo_Location_WX_2_white.png" alt="Echo Location WX Banner"
+        class="header-banner dark" />
       <button class="dark-mode-toggle" id="toggleDarkMode">🌙</button>
     </header>
 
@@ -45,7 +46,10 @@
       <!-- Left Panel: Pinned Locations -->
       <div id="left-panel">
         <h2>Pinned Locations</h2>
-        <input type="text" id="favoriteSearch" placeholder="Search favorites..." />
+        <div class="favorites-search-container">
+          <input type="text" id="favoriteSearch" placeholder="Search favorites..." />
+          <button id="pin-btn" onclick="pinCurrentLocation()" title="Pin This Location">📌</button>
+        </div>
         <div id="favorites"></div>
       </div>
 
@@ -68,7 +72,6 @@
           <div id="forecast-loading" class="spinner hidden"></div>
         </div>
       </div>
-
     </div>
 
     <!-- Bottom Panel: Active Alerts -->
@@ -80,8 +83,7 @@
       <div id="alerts"></div>
     </div>
 
-    <!-- Pin Button -->
-    <button id="pin-btn" onclick="pinCurrentLocation()">Pin This Location</button>
+    <!-- Removed the original Pin Button from the bottom panel -->
   </div>
 
   <!-- Load Leaflet JS -->
