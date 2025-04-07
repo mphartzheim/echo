@@ -3,6 +3,7 @@ let map;
 let selectedLocation = null;
 let currentFavorites = [];
 let currentMarker = null;
+let radarLayer;
 
 window.addEventListener('DOMContentLoaded', async () => {
   // Initialize Leaflet map and expose globally
@@ -10,6 +11,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors'
   }).addTo(map);
+  updateRadarLayer();
+  setInterval(updateRadarLayer, 5 * 60 * 1000);
   console.log("Map initialized");
 
   // DOM elements
@@ -34,7 +37,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   map.on('click', async function (e) {
     console.log('Map clicked:', e.latlng);
     selectedLocation = e.latlng;
-  
+
     // Ensure the spinner exists.
     let spinner = document.getElementById('forecast-loading');
     if (!spinner) {
@@ -44,7 +47,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       forecastDiv.prepend(spinner);
       console.log("Spinner recreated.");
     }
-  
+
     // Clear forecastDiv while preserving the spinner element.
     Array.from(forecastDiv.children).forEach(child => {
       if (child.id !== 'forecast-loading') {
@@ -53,21 +56,21 @@ window.addEventListener('DOMContentLoaded', async () => {
     });
     // Clear alerts normally.
     alertsDiv.innerHTML = '';
-  
+
     // Show spinner.
     spinner.classList.remove("hidden");
     console.log("Spinner should be visible now.", spinner);
-  
+
     // Remove any existing marker.
     if (currentMarker) {
       map.removeLayer(currentMarker);
       console.log("Existing marker removed.");
     }
-  
+
     try {
       currentMarker = L.marker([selectedLocation.lat, selectedLocation.lng]).addTo(map);
       console.log("Marker added at:", selectedLocation);
-  
+
       // Force browser to repaint the spinner.
       await new Promise(resolve => {
         console.log("Starting spinner delay...");
@@ -76,18 +79,18 @@ window.addEventListener('DOMContentLoaded', async () => {
           resolve();
         }, 0);
       });
-  
+
       const weatherForecast = await window.api.fetchWeather(selectedLocation.lat, selectedLocation.lng);
       console.log("Weather forecast data received:", weatherForecast);
-  
+
       const activeAlerts = await window.api.fetchAlerts(selectedLocation.lat, selectedLocation.lng);
       console.log("Active alerts data received:", activeAlerts);
-  
+
       await updateForecastHeaderWithLocation(selectedLocation.lat, selectedLocation.lng);
       console.log("Forecast header updated.");
       await updateCurrentConditions(selectedLocation.lat, selectedLocation.lng);
       console.log("Current conditions updated.");
-  
+
       // Append new forecast content without overwriting the spinner.
       if (weatherForecast?.length) {
         const forecastHtml = weatherForecast.map(period => `
@@ -102,7 +105,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       } else {
         console.log("No weather forecast data available.");
       }
-  
+
       if (activeAlerts?.length) {
         const alertsHtml = activeAlerts.map(alert => `
           <div>
@@ -121,7 +124,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       spinner.classList.add("hidden");
       console.log("Spinner hidden.");
     }
-  });  
+  });
 
   // Wire up search box and favorite search
   document.getElementById("locationSearch").addEventListener("keydown", function (event) {
@@ -521,3 +524,46 @@ window.copyAlerts = function () {
       });
     });
 };
+
+async function updateRadarLayer() {
+  try {
+    const res = await fetch("https://api.rainviewer.com/public/weather-maps.json");
+    const data = await res.json();
+
+    const pastFrames = data.radar.past;
+    const availableTimestamps = pastFrames.map(frame => frame.time).reverse(); // Newest to oldest
+
+    let workingTimestamp = null;
+
+    for (const timestamp of availableTimestamps) {
+      const testUrl = `https://tilecache.rainviewer.com/v2/radar/${timestamp}/256/4/3/5/2/1_1.png`;
+
+      // Try to fetch one tile from this timestamp to confirm it's real
+      const response = await fetch(testUrl, { method: 'HEAD' });
+      if (response.ok) {
+        workingTimestamp = timestamp;
+        break;
+      }
+    }
+
+    if (!workingTimestamp) {
+      console.warn("No working radar frame found.");
+      return;
+    }
+
+    if (radarLayer) {
+      map.removeLayer(radarLayer);
+    }
+
+    radarLayer = L.tileLayer(`https://tilecache.rainviewer.com/v2/radar/${workingTimestamp}/256/{z}/{x}/{y}/2/1_1.png`, {
+      opacity: 0.6,
+      maxZoom: 12,
+      attribution: 'Radar &copy; RainViewer.com'
+    });
+
+    radarLayer.addTo(map);
+    console.log("Radar layer added with working timestamp:", workingTimestamp);
+  } catch (error) {
+    console.error("Error loading radar layer:", error);
+  }
+}
