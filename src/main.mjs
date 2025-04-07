@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, Tray, Menu } from 'electron';
 import axios from 'axios';
 import path from 'path';
 import fs from 'fs/promises';
@@ -9,16 +9,18 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+let tray = null;
+let mainWindow = null;
+let isQuiting = false;
+
 function getFavoritesPath() {
-  // Use a folder in the user's home directory for cross-platform storage.
   const folder = path.join(os.homedir(), '.echo-location-wx');
-  // Create the folder if it doesn't exist
   fs.mkdir(folder, { recursive: true }).catch(console.error);
   return path.join(folder, 'favorites.json');
 }
 
 function createWindow() {
-  const win = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1280,
     height: 1024,
     minWidth: 1280,
@@ -31,10 +33,48 @@ function createWindow() {
     }
   });
 
-  win.loadFile(path.join(__dirname, 'index.html'));
+  mainWindow.loadFile(path.join(__dirname, 'index.html'));
+
+  // Handle minimize-to-tray
+  mainWindow.on('minimize', (event) => {
+    event.preventDefault();
+    mainWindow.hide();
+  });
+
+  mainWindow.on('close', (event) => {
+    if (!isQuiting) {
+      event.preventDefault();
+      mainWindow.hide();
+    }
+  });
+
+  // Set up tray icon and menu
+  const iconPath = path.join(__dirname, '../assets/icons/Grimace28.png');
+  tray = new Tray(iconPath);
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Show App',
+      click: () => {
+        mainWindow.show();
+      }
+    },
+    {
+      label: 'Quit',
+      click: () => {
+        isQuiting = true;
+        app.quit();
+      }
+    }
+  ]);
+  tray.setToolTip('Echo Location WX');
+  tray.setContextMenu(contextMenu);
+
+  tray.on('double-click', () => {
+    mainWindow.show();
+  });
 }
 
-// IPC handler for fetching weather forecast
+// IPC handlers (unchanged)
 ipcMain.handle('fetch-weather', async (event, lat, lon) => {
   try {
     const pointUrl = `https://api.weather.gov/points/${lat},${lon}`;
@@ -48,7 +88,6 @@ ipcMain.handle('fetch-weather', async (event, lat, lon) => {
   }
 });
 
-// IPC handler for fetching active alerts
 ipcMain.handle('fetch-alerts', async (event, lat, lon) => {
   try {
     const alertsUrl = `https://api.weather.gov/alerts/active?point=${lat},${lon}`;
@@ -60,7 +99,6 @@ ipcMain.handle('fetch-alerts', async (event, lat, lon) => {
   }
 });
 
-// IPC handler for loading favorites
 ipcMain.handle('load-favorites', async () => {
   const filePath = getFavoritesPath();
   try {
@@ -72,7 +110,6 @@ ipcMain.handle('load-favorites', async () => {
   }
 });
 
-// IPC handler for saving favorites
 ipcMain.handle('save-favorites', async (event, favorites) => {
   const filePath = getFavoritesPath();
   try {
@@ -84,12 +121,17 @@ ipcMain.handle('save-favorites', async (event, favorites) => {
   }
 });
 
+// App lifecycle
 app.whenReady().then(() => {
   createWindow();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
+});
+
+app.on('before-quit', () => {
+  isQuiting = true;
 });
 
 app.on('window-all-closed', () => {

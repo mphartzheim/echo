@@ -139,7 +139,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   });
 });
 
-
 // Render favorites
 function renderFavorites(favorites) {
   const favoritesDiv = document.getElementById('favorites');
@@ -439,7 +438,7 @@ function copyForecastLimited(limit) {
 
   const lines = [];
 
-  Array.from(forecastEl.children).slice(0, limit*2+2).forEach(item => {
+  Array.from(forecastEl.children).slice(0, limit * 2 + 2).forEach(item => {
     const boldEl = item.querySelector("b");
     let label = "";
     let description = "";
