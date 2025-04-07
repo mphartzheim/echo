@@ -1,0 +1,10 @@
+/* layout.css */
+/* Main content area grows to fill space between top and bottom */
+#main-container {
+    flex: 1;
+    display: flex;
+    gap: 1rem;
+    padding: 0.5rem 1rem;
+    overflow: hidden;
+  }
+  

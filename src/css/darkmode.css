@@ -1,0 +1,70 @@
+/* darkmode.css */
+
+/* Global dark mode styles */
+body.dark-mode {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+/* Header adjustments */
+body.dark-mode header {
+    background-color: #1e1e1e;
+}
+
+/* Dark mode banner image overrides */
+body.dark-mode .header-banner.light {
+    display: none;
+}
+
+body.dark-mode .header-banner.dark {
+    display: block;
+}
+
+/* Search bar and inline links */
+body.dark-mode #search-bar {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+}
+
+body.dark-mode #spc-inline-links a,
+body.dark-mode #spc-inline-links button {
+    background-color: #333;
+    color: #e0e0e0;
+    border-color: #444;
+}
+
+/* Panels */
+body.dark-mode #left-panel,
+body.dark-mode #center-panel,
+body.dark-mode #right-panel,
+body.dark-mode #bottom-panel {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    border-color: #333;
+}
+
+/* Forecast and alerts areas */
+body.dark-mode #forecast,
+body.dark-mode .favorite-item {
+    background-color: #2a2a2a;
+    color: #e0e0e0;
+    border-color: #444;
+}
+
+/* Buttons */
+body.dark-mode button.dark-mode-toggle {
+    background: transparent;
+    border: none;
+    color: #fff;
+}
+
+body.dark-mode button.dark-mode-toggle:hover {
+    background: transparent;
+    color: #ccc;
+}
+
+/* Spinner adjustments */
+body.dark-mode .spinner {
+    border: 4px solid #444;
+    border-top: 4px solid #fff;
+}

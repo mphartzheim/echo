@@ -1,0 +1,53 @@
+/* header.css */
+/* Header styles */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    padding: 1rem;
+    background-color: #fff3e0;
+}
+
+.header-banner {
+    display: block;
+    max-width: 100%;
+    max-height: 80px;
+    height: auto;
+    margin: 0 auto;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.8rem;
+}
+
+h1,
+#search-bar {
+    flex-shrink: 0;
+    margin: 0.5rem 1rem 0 1rem;
+}
+
+/* Dark mode toggle button styles */
+button.dark-mode-toggle {
+    background: transparent; /* Transparent background */
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0;
+    color: #333;
+    transition: color 0.2s ease, background 0.2s ease;
+}
+
+button.dark-mode-toggle:hover {
+    background: transparent; /* Remains transparent on hover */
+    color: #007bff;
+}
+
+/* Banner image defaults for light mode */
+.header-banner.light {
+    display: block;
+}
+.header-banner.dark {
+    display: none;
+}

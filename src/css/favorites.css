@@ -1,0 +1,42 @@
+/* favorites.css */
+/* Styles for favorite items */
+#favoriteSearch {
+    width: 100%;
+    padding: 0.4rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  
+  .favorite-item {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .favorite-item:hover {
+    background-color: #e0f7fa;
+  }
+  
+  .favorite-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .favorite-name {
+    flex: 1;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .favorite-actions button {
+    margin-left: 0.25rem;
+  }
+  

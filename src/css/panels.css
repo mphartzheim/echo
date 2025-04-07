@@ -1,0 +1,111 @@
+/* panels.css */
+/* Left Panel: Pinned Locations */
+#left-panel {
+    width: 20%;
+    background-color: #ffffff;
+    padding: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  
+  /* Center Panel: Map */
+  #center-panel {
+    flex: 1;
+    background-color: #f1f1f1;
+    padding: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  #map {
+    width: 100%;
+    height: 100%;
+    border: 1px solid #aaa;
+    border-radius: 8px;
+  }
+  
+  /* Right Panel: Forecast */
+  #right-panel {
+    width: 20%;
+    background-color: #ffffff;
+    padding: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+  }
+  
+  #forecast {
+    flex: 1;
+    overflow-y: auto;
+    margin-top: 0.5rem;
+  }
+  
+  .updated-time {
+    font-size: 0.85em;
+    color: #888;
+  }
+  
+  .forecast-header {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+  }
+  
+  #copy-forecast-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0;
+    color: #333;
+    transition: color 0.2s ease;
+  }
+  
+  #copy-forecast-btn:hover {
+    color: #007bff;
+  }
+  
+  /* Bottom Panel: Active Alerts */
+  #bottom-panel {
+    height: 150px;
+    background-color: #fff3cd;
+    padding: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow-y: auto;
+    flex-shrink: 0;
+    margin: 0.5rem 1rem;
+  }
+  
+  .alerts-header {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+  }
+  
+  #copy-alerts-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0;
+    color: #333;
+    transition: color 0.2s ease;
+  }
+  
+  #copy-alerts-btn:hover {
+    color: #d9534f;
+  }
+  

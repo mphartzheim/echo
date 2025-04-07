@@ -1,0 +1,11 @@
+/* reset.css */
+/* Reset default margins/padding, use full viewport height, hide overall scrollbars */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    background-color: #fff3e0;
+  }
+  
