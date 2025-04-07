@@ -17,8 +17,16 @@
 
     <!-- Search Bar -->
     <div id="search-bar">
-      <input type="text" id="locationSearch" placeholder="Search for a location..." />
-      <button onclick="searchLocation()">Search</button>
+      <div id="search-input-wrapper">
+        <input type="text" id="locationSearch" placeholder="Search for a location..." />
+        <button onclick="searchLocation()">Search</button>
+      </div>
+
+      <div id="spc-inline-links">
+        <button onclick="openSpcWindow('day1')">Day 1</button>
+        <button onclick="openSpcWindow('day2')">Day 2</button>
+        <button onclick="openSpcWindow('day3')">Day 3</button>
+      </div>
     </div>
 
     <div id="main-container">
@@ -39,14 +47,14 @@
         <h2 class="forecast-header">
           Forecast
           <button id="copy-forecast-btn" onclick="copyForecast()" title="Copy Forecast">📋</button>
-        </h2>              
+        </h2>
         <div id="forecast-location" class="subheader"></div>
         <div id="current-conditions" class="subheader"></div>
         <div id="forecast">
           <div id="forecast-loading" class="spinner hidden"></div>
         </div>
-      </div>      
-      
+      </div>
+
     </div>
 
     <!-- Bottom Panel: Active Alerts -->
@@ -54,7 +62,7 @@
       <h2 class="alerts-header">
         Active Alerts
         <button id="copy-alerts-btn" onclick="copyAlerts()" title="Copy Alerts">📋</button>
-      </h2>      
+      </h2>
       <div id="alerts"></div>
     </div>
 

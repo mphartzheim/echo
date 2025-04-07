@@ -37,10 +37,61 @@ h1,
 
 /* Search Bar layout */
 #search-bar {
-  width: 20%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+  background-color: #fff3e0;
+}
+
+#search-input-wrapper {
+  display: flex;
+  flex-grow: 1;
+  gap: 0.5rem;
+}
+
+#search-input-wrapper input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+#search-input-wrapper button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f1f1f1;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+#search-input-wrapper button:hover {
+  background-color: #e0e0e0;
+}
+
+#spc-inline-links {
   display: flex;
   gap: 0.5rem;
-  align-items: center;
+}
+
+#spc-inline-links a {
+  text-decoration: none;
+  color: #fff;
+  background-color: #007bff;
+  padding: 0.4rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+}
+
+#spc-inline-links a:hover {
+  background-color: #0056b3;
 }
 
 #search-bar input {
@@ -61,6 +112,22 @@ h1,
 
 #search-bar button:hover {
   background-color: #e0e0e0;
+}
+
+#spc-inline-links button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+#spc-inline-links button:hover {
+  background-color: #0056b3;
 }
 
 /* Main content area grows to fill space between top and bottom */
