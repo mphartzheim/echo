@@ -1,9 +1,13 @@
+import { fetchNWWSAlerts } from './utils/fetchAlerts.js';
+import { parseCAP } from './utils/parseAlerts.js';
+
 // Global variables
 let map;
 let selectedLocation = null;
 let currentFavorites = [];
 let currentMarker = null;
 let radarLayer;
+let currentAlertLayers = [];
 
 window.addEventListener('DOMContentLoaded', async () => {
   // Initialize Leaflet map and expose globally
@@ -11,8 +15,10 @@ window.addEventListener('DOMContentLoaded', async () => {
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors'
   }).addTo(map);
+  loadNWWSAlerts(map);
   updateRadarLayer();
   setInterval(updateRadarLayer, 5 * 60 * 1000);
+  setInterval(loadNWWSAlerts, 60000);
   console.log("Map initialized");
 
   // DOM elements
@@ -414,6 +420,39 @@ async function updateCurrentConditions(lat, lon) {
     console.warn("Could not load current conditions:", err);
     document.getElementById("current-conditions").textContent = "";
   }
+}
+
+export async function loadNWWSAlerts(map) {
+  console.log("Loading NWWS alerts...");
+  const xml = await fetchNWWSAlerts();
+  if (!xml) return;
+
+  const alerts = parseCAP(xml);
+
+  // Remove old alerts
+  currentAlertLayers.forEach(layer => map.removeLayer(layer));
+  currentAlertLayers = [];
+
+  alerts.forEach(alert => {
+    if (!alert.polygon) return;
+
+    const coords = alert.polygon.split(" ").map(pair => {
+      const [lat, lon] = pair.split(",");
+      return [parseFloat(lat), parseFloat(lon)];
+    });
+
+    const polygon = L.polygon(coords, {
+      color: "red",
+      fillOpacity: 0.3
+    }).bindPopup(`
+      <strong>${alert.event}</strong><br>
+      ${alert.areaDesc}<br>
+      <small>${alert.summary}</small>
+    `);
+    console.log("Alert polygon:", alert.polygon);
+    polygon.addTo(map);
+    currentAlertLayers.push(polygon);
+  });
 }
 
 function cToF(celsius) {
