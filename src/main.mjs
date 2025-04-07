@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, Tray, Menu } from 'electron';
+import { app, BrowserWindow, ipcMain, Tray, Menu, screen } from 'electron';
 import axios from 'axios';
 import path from 'path';
 import fs from 'fs/promises';
@@ -20,7 +20,8 @@ function getFavoritesPath() {
 }
 
 function createWindow() {
-  mainWindow = new BrowserWindow({
+  // Set up window options without hardcoding x and y yet
+  let windowOptions = {
     width: 1280,
     height: 1024,
     minWidth: 1280,
@@ -31,7 +32,18 @@ function createWindow() {
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.js')
     }
-  });
+  };
+
+  // Get the primary display
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { x, y, width, height } = primaryDisplay.workArea;
+
+  // Calculate center position based on primary display work area
+  windowOptions.x = x + Math.floor((width - windowOptions.width) / 2);
+  windowOptions.y = y + Math.floor((height - windowOptions.height) / 2);
+
+  // Create the main window with computed options
+  mainWindow = new BrowserWindow(windowOptions);
 
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
 
