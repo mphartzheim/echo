@@ -8,6 +8,7 @@ import readline from 'readline';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.join(__dirname, '..');
 const packageJsonPath = path.join(rootDir, 'package.json');
+const distDir = path.join(rootDir, 'dist');
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -34,7 +35,7 @@ async function createReleaseNotes(version) {
         const tempVersion = `${version}-temp`;
         let versionHeaderRegex = new RegExp(`## \\[${version}\\] - \\d{4}-\\d{2}-\\d{2}`);
         let versionMatch = changelog.match(versionHeaderRegex);
-        
+
         // If normal version isn't found, try the temp version
         if (!versionMatch) {
             versionHeaderRegex = new RegExp(`## \\[${tempVersion}\\] - \\d{4}-\\d{2}-\\d{2}`);
@@ -79,15 +80,75 @@ async function fixChangelog(tempVersion, actualVersion) {
         console.log(`\nFixing changelog: replacing ${tempVersion} with ${actualVersion}...`);
         const changelogPath = path.join(rootDir, 'CHANGELOG.md');
         let changelog = await fs.readFile(changelogPath, 'utf8');
-        
+
         // Replace [version-temp] with [version]
         changelog = changelog.replace(`[${tempVersion}]`, `[${actualVersion}]`);
-        
+
         await fs.writeFile(changelogPath, changelog);
         console.log('✅ Changelog fixed successfully');
     } catch (error) {
         console.error('Error fixing changelog:', error);
         throw error;
+    }
+}
+
+// Function to clean up old build artifacts
+async function cleanupBuildArtifacts() {
+    console.log('\nCleaning up old build artifacts...');
+    try {
+        // Check if dist directory exists
+        try {
+            await fs.access(distDir);
+        } catch (err) {
+            console.log('No dist directory found, skipping cleanup.');
+            return;
+        }
+
+        // Read current version
+        const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf8'));
+        const currentVersion = packageJson.version;
+
+        // Get all files in dist directory
+        const files = await fs.readdir(distDir);
+
+        // Keep track of how many files were removed
+        let removedCount = 0;
+
+        // Process each file
+        for (const file of files) {
+            const filePath = path.join(distDir, file);
+
+            // Skip directories and latest.yml/latest-linux.yml files
+            const stat = await fs.stat(filePath);
+            if (stat.isDirectory() ||
+                file === 'latest.yml' ||
+                file === 'latest-linux.yml' ||
+                file === 'builder-debug.yml' ||
+                file === 'builder-effective-config.yaml') {
+                continue;
+            }
+
+            // Check if file is from a previous version
+            // Look for version numbers in filenames like "Echo Location WX Setup 1.1.4.exe"
+            // or "echo-location-wx_1.1.4_amd64.deb" or "Echo Location WX-1.1.4.AppImage"
+            const versionRegex = /[._-](0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)/;
+            const versionMatch = file.match(versionRegex);
+
+            if (versionMatch) {
+                const fileVersion = `${versionMatch[1]}.${versionMatch[2]}.${versionMatch[3]}`;
+
+                // Remove file if it's an older version
+                if (fileVersion !== currentVersion) {
+                    console.log(`Removing old artifact: ${file}`);
+                    await fs.unlink(filePath);
+                    removedCount++;
+                }
+            }
+        }
+
+        console.log(`✅ Cleanup complete. Removed ${removedCount} old build artifacts.`);
+    } catch (error) {
+        console.error('Error cleaning up build artifacts:', error);
     }
 }
 
@@ -135,7 +196,7 @@ async function release() {
         // Now generate the changelog with the temporary tag in place
         console.log('\nUpdating changelog...');
         run('npm run changelog');
-        
+
         // Fix the changelog to replace the temp version with the actual version
         await fixChangelog(`${newVersion}-temp`, newVersion);
 
@@ -157,6 +218,9 @@ async function release() {
         // Build the application for all platforms
         console.log('\nBuilding application...');
         const buildTarget = await prompt('Build for which platforms? (all/win/linux): ');
+
+        // Clean up old build artifacts before building
+        await cleanupBuildArtifacts();
 
         switch (buildTarget.toLowerCase()) {
             case 'all':
