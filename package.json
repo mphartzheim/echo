@@ -1,6 +1,6 @@
 {
   "name": "echo-location-wx",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "A cross-platform desktop weather app that provides real-time forecasts, alerts, and radar links",
   "author": "Michael Hartzheim <mphartzheim@pm.me>",
   "main": "src/main.mjs",
