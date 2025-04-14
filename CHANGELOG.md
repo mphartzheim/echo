@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.8] - 2025-04-14
+
+### ⚙️ Miscellaneous Tasks
+
+- Clean up old artifacts on release
+- Ci/cd changes
+- Bump version to 1.1.8
+
 ## [1.1.7] - 2025-04-14
 
 ### ⚙️ Miscellaneous Tasks
@@ -11,6 +19,7 @@ All notable changes to this project will be documented in this file.
 - Bump version to 1.1.6
 - Automation fixes
 - Bump version to 1.1.7
+- Update changelog for v1.1.7
 
 ## [1.1.4] - 2025-04-14
 
