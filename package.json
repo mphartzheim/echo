@@ -5,7 +5,13 @@
   "type": "module",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder"
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux",
+    "build:all": "electron-builder -wl",
+    "release": "node scripts/release.js",
+    "version:bump": "node scripts/bump-version.js",
+    "changelog": "git-cliff --output CHANGELOG.md"
   },
   "build": {
     "appId": "com.example.echolocationwx",

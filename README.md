@@ -30,3 +30,67 @@
 - **Center Panel:** Interactive Leaflet map.
 - **Right Panel:** Forecast display with copy options.
 - **Bottom Panel:** Active alerts for the selected location.
+
+## 🛠️ Development
+
+### Building the Application
+
+You can build the application for your current platform using:
+
+```bash
+npm run build
+```
+
+To build for specific platforms:
+
+```bash
+# Build for Windows
+npm run build:win
+
+# Build for Linux
+npm run build:linux
+
+# Build for both Windows and Linux
+npm run build:all
+```
+
+### Release Process
+
+The release process is automated with scripts that handle version bumping, changelog generation, and building the application.
+
+To create a new release:
+
+```bash
+npm run release
+```
+
+This interactive script will:
+1. Check for uncommitted changes
+2. Prompt for release type (patch, minor, major)
+3. Bump the version in package.json
+4. Update the CHANGELOG.md file
+5. Commit the changes and create a git tag
+6. Build the application for selected platforms
+7. Optionally push the changes to GitHub
+
+#### Manual Steps
+
+You can also perform these steps manually:
+
+```bash
+# Bump version (patch, minor, or major)
+npm run version:bump [patch|minor|major]
+
+# Update changelog
+npm run changelog
+
+# Build for all platforms
+npm run build:all
+```
+
+### Continuous Integration
+
+This project uses GitHub Actions for CI/CD:
+
+- **CI Workflow**: Runs on every push to main branch and pull requests
+- **Release Workflow**: Triggered when a new tag is pushed, builds and creates a GitHub Release
