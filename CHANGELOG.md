@@ -6,8 +6,15 @@ All notable changes to this project will be documented in this file.
 
 ### ⚙️ Miscellaneous Tasks
 
+- Automations update
+
+## [1.1.3] - 2025-04-14
+
+### ⚙️ Miscellaneous Tasks
+
 - Scripting updates
 - Scripting updates #2
+- Release v1.1.3
 
 ## [1.1.2] - 2025-04-14
 
