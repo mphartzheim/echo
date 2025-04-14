@@ -2,16 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.1.0] - 2025-04-14
+## [unreleased]
 
 ### 🚀 Features
 
 - Refactor forecast loading to use pointData and render helpers
 - Initial polygon support!
+- Official NWS alert polygon colors
 
 ### ⚙️ Miscellaneous Tasks
 
 - Update changelog for v1.0.1 release
+- Build automations
 
 ## [1.0.1] - 2025-04-07
 
