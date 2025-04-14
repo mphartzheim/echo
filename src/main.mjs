@@ -97,7 +97,33 @@ ipcMain.handle('fetch-alerts', async (event, lat, lon) => {
   try {
     const alertsUrl = `https://api.weather.gov/alerts/active?point=${lat},${lon}`;
     const alertsResponse = await axios.get(alertsUrl);
-    return alertsResponse.data.features;
+    const alerts = alertsResponse.data.features || [];
+
+    // Process alerts to ensure we have polygon data where possible
+    for (let i = 0; i < alerts.length; i++) {
+      const alert = alerts[i];
+
+      // If alert doesn't have geometry but has affected zones, try to get zone geometry
+      if ((!alert.geometry || alert.geometry.coordinates.length === 0) &&
+        alert.properties && alert.properties.affectedZones &&
+        alert.properties.affectedZones.length > 0) {
+
+        try {
+          // Get first zone as fallback (first is usually most relevant)
+          const zoneResponse = await axios.get(alert.properties.affectedZones[0]);
+
+          // Update alert with zone geometry if available
+          if (zoneResponse.data && zoneResponse.data.geometry) {
+            alert.geometry = zoneResponse.data.geometry;
+            console.log(`Added zone geometry to alert: ${alert.properties.headline || 'Unnamed alert'}`);
+          }
+        } catch (zoneError) {
+          console.warn('Error fetching zone geometry:', zoneError.message);
+        }
+      }
+    }
+
+    return alerts;
   } catch (error) {
     console.error('Error fetching alerts:', error);
     return [];
