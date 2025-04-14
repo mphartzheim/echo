@@ -2,16 +2,60 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.1.0] - 2025-04-14
+## [1.1.8] - 2025-04-14
+
+### ⚙️ Miscellaneous Tasks
+
+- Clean up old artifacts on release
+- Ci/cd changes
+- Bump version to 1.1.8
+
+## [1.1.7] - 2025-04-14
+
+### ⚙️ Miscellaneous Tasks
+
+- Automation updates - fix windows release
+- Fix releasenotes automation
+- Bump version to 1.1.6
+- Automation fixes
+- Bump version to 1.1.7
+- Update changelog for v1.1.7
+
+## [1.1.4] - 2025-04-14
+
+### ⚙️ Miscellaneous Tasks
+
+- Automations update
+- Release v1.1.4
+
+## [1.1.3] - 2025-04-14
+
+### ⚙️ Miscellaneous Tasks
+
+- Scripting updates
+- Scripting updates #2
+- Release v1.1.3
+
+## [1.1.2] - 2025-04-14
+
+### ⚙️ Miscellaneous Tasks
+
+- V1.1.1 updates
+- Release v1.1.2
+
+## [1.1.1] - 2025-04-14
 
 ### 🚀 Features
 
 - Refactor forecast loading to use pointData and render helpers
 - Initial polygon support!
+- Official NWS alert polygon colors
 
 ### ⚙️ Miscellaneous Tasks
 
 - Update changelog for v1.0.1 release
+- Build automations
+- Release v1.1.1
 
 ## [1.0.1] - 2025-04-07
 

@@ -1,11 +1,19 @@
 {
   "name": "echo-location-wx",
-  "version": "1.1.0",
+  "version": "1.1.8",
+  "description": "A cross-platform desktop weather app that provides real-time forecasts, alerts, and radar links",
+  "author": "Michael Hartzheim <mphartzheim@pm.me>",
   "main": "src/main.mjs",
   "type": "module",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder"
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux",
+    "build:all": "electron-builder -wl",
+    "release": "node scripts/release.js",
+    "version:bump": "node scripts/bump-version.js",
+    "changelog": "git-cliff --output CHANGELOG.md"
   },
   "build": {
     "appId": "com.example.echolocationwx",
@@ -16,14 +24,19 @@
     "directories": {
       "output": "dist"
     },
+    "publish": null,
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "assets/icons/translogocolor.ico"
     },
     "linux": {
       "target": [
         "AppImage",
         "deb"
-      ]
+      ],
+      "maintainer": "Michael Hartzheim (mphartzheim@pm.me)",
+      "category": "Utility",
+      "icon": "assets/icons"
     }
   },
   "dependencies": {

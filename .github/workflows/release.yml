@@ -1,0 +1,110 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write  # This is needed for creating releases
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            platform: linux
+          - os: windows-latest
+            platform: win
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Use Node.js 18.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18.x
+        cache: 'npm'
+    
+    - name: Install Dependencies
+      run: npm ci
+      
+    - name: Build for ${{ matrix.platform }}
+      run: npm run build:${{ matrix.platform }}
+      
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.platform }}-artifacts
+        path: |
+          dist/**/*.exe
+          dist/**/*.deb
+          dist/**/*.AppImage
+          dist/**/*.zip
+          dist/**/*.yml
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          
+      - name: Install git-cliff
+        run: npm install -g git-cliff@latest
+      
+      - name: Generate Release Notes
+        run: |
+          # First generate the full CHANGELOG.md
+          git-cliff --output CHANGELOG.md
+          
+          # Extract the latest version's release notes
+          # Use git describe to get the latest tag
+          VERSION=$(git describe --tags --abbrev=0)
+          VERSION=${VERSION#v}  # Remove the 'v' prefix
+          
+          # Create RELEASENOTES.md with current version only
+          echo "# Release Notes" > RELEASENOTES.md
+          echo "" >> RELEASENOTES.md
+          
+          # Extract section for current version from CHANGELOG.md
+          awk -v version="$VERSION" '
+            BEGIN { found=0; }
+            $0 ~ "^## \\[" version "\\]" { found=1; print; next; }
+            found==1 && $0 ~ "^## \\[[0-9]+" { exit; }
+            found==1 { print; }
+          ' CHANGELOG.md >> RELEASENOTES.md
+          
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+          
+      - name: Prepare release files
+        run: |
+          # Create release directory
+          mkdir -p release-files
+          
+          # Copy all artifacts to flat structure for release
+          find release-artifacts -type f -name "*.exe" -o -name "*.deb" -o -name "*.AppImage" -o -name "*.zip" -o -name "*.yml" | xargs -I{} cp {} release-files/
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: RELEASENOTES.md
+          files: release-files/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

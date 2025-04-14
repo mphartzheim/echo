@@ -96,7 +96,7 @@ function addPolygonToMap(map, alert) {
         const coordinates = alert.geometry.coordinates[0].map(coord => [coord[1], coord[0]]);
 
         // Determine color based on alert properties
-        const color = getAlertColor(alert.properties.severity);
+        const color = getAlertColor(alert.properties.severity, alert);
 
         // Create and add the polygon
         const polygon = L.polygon(coordinates, {
@@ -120,19 +120,62 @@ function addPolygonToMap(map, alert) {
     }
 }
 
-// Helper function to determine alert color based on severity
-function getAlertColor(severity) {
+// Helper function to determine alert color based on NWS official color codes
+function getAlertColor(severity, alert) {
+    // If we have the event type, use that for more specific coloring
+    if (alert && alert.properties && alert.properties.event) {
+        const eventType = alert.properties.event.toLowerCase();
+
+        // Using official NWS color codes: https://www.weather.gov/help-map/
+        if (eventType.includes('tornado')) {
+            return '#FF0000'; // Red for Tornado Warning
+        } else if (eventType.includes('flash flood')) {
+            return '#00FF00'; // Green for Flash Flood Warning
+        } else if (eventType.includes('flood')) {
+            return '#00FF00'; // Green for Flood Warning
+        } else if (eventType.includes('severe thunderstorm')) {
+            return '#FFA500'; // Orange for Severe Thunderstorm Warning
+        } else if (eventType.includes('winter storm')) {
+            return '#FF69B4'; // Pink for Winter Storm Warning
+        } else if (eventType.includes('blizzard')) {
+            return '#FF69B4'; // Pink for Blizzard Warning
+        } else if (eventType.includes('ice storm')) {
+            return '#FF69B4'; // Pink for Ice Storm Warning
+        } else if (eventType.includes('winter weather')) {
+            return '#00FFFF'; // Cyan for Winter Weather Advisory
+        } else if (eventType.includes('frost') || eventType.includes('freeze')) {
+            return '#6495ED'; // Cornflower Blue for Frost/Freeze Warning
+        } else if (eventType.includes('heat')) {
+            return '#8B0000'; // Dark Red for Heat Warning
+        } else if (eventType.includes('dense fog')) {
+            return '#808080'; // Gray for Dense Fog Warning
+        } else if (eventType.includes('special marine')) {
+            return '#800080'; // Purple for Special Marine Warning
+        } else if (eventType.includes('hurricane')) {
+            return '#FF00FF'; // Magenta for Hurricane Warning
+        } else if (eventType.includes('typhoon')) {
+            return '#FF00FF'; // Magenta for Typhoon Warning
+        } else if (eventType.includes('tropical storm')) {
+            return '#9370DB'; // Medium Purple for Tropical Storm Warning
+        } else if (eventType.includes('extreme wind')) {
+            return '#CD853F'; // Peru for Extreme Wind Warning
+        } else if (eventType.includes('dust')) {
+            return '#8B4513'; // Saddle Brown for Dust Storm Warning
+        }
+    }
+
+    // Fallback to severity-based coloring for any unmatched event types
     switch (severity) {
         case 'Extreme':
-            return '#ff0000'; // Red
+            return '#FF00FF'; // Magenta
         case 'Severe':
-            return '#ff6600'; // Orange
+            return '#FF0000'; // Red
         case 'Moderate':
-            return '#ffcc00'; // Yellow
+            return '#FFA500'; // Orange
         case 'Minor':
-            return '#ffff00'; // Light Yellow
+            return '#FFFF00'; // Yellow
         default:
-            return '#3388ff'; // Default blue
+            return '#1E90FF'; // Dodger Blue
     }
 }
 
@@ -162,21 +205,24 @@ function createAlertLegend(map) {
 
     // Add title
     const title = document.createElement('div');
-    title.textContent = 'Alert Severity';
+    title.textContent = 'Warning Types';
     title.style.fontWeight = 'bold';
     title.style.marginBottom = '5px';
     legend.appendChild(title);
 
-    // Add legend items
-    const severities = [
-        { level: 'Extreme', color: '#ff0000' },
-        { level: 'Severe', color: '#ff6600' },
-        { level: 'Moderate', color: '#ffcc00' },
-        { level: 'Minor', color: '#ffff00' },
-        { level: 'Unknown', color: '#3388ff' }
+    // Add legend items using official NWS colors
+    const warningTypes = [
+        { level: 'Tornado', color: '#FF0000' },
+        { level: 'Severe Thunderstorm', color: '#FFA500' },
+        { level: 'Flash Flood/Flood', color: '#00FF00' },
+        { level: 'Winter Storm/Blizzard', color: '#FF69B4' },
+        { level: 'Marine', color: '#800080' },
+        { level: 'Hurricane/Typhoon', color: '#FF00FF' },
+        { level: 'Tropical Storm', color: '#9370DB' },
+        { level: 'Other Warnings', color: '#1E90FF' }
     ];
 
-    severities.forEach(item => {
+    warningTypes.forEach(item => {
         const row = document.createElement('div');
         row.style.display = 'flex';
         row.style.alignItems = 'center';
