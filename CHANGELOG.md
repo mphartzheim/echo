@@ -6,7 +6,14 @@ All notable changes to this project will be documented in this file.
 
 ### ⚙️ Miscellaneous Tasks
 
+- Automation updates - fix windows release
+
+## [1.1.4] - 2025-04-14
+
+### ⚙️ Miscellaneous Tasks
+
 - Automations update
+- Release v1.1.4
 
 ## [1.1.3] - 2025-04-14
 

@@ -97,17 +97,32 @@ async function release() {
         const updatedPackageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf8'));
         const newVersion = updatedPackageJson.version;
 
-        // Update changelog
+        // Commit the version bump
+        console.log('\nCommitting version bump...');
+        run(`git add package.json`);
+        run(`git commit -m "chore: bump version to ${newVersion}"`);
+
+        // Create a temporary tag for the new version 
+        // This allows git-cliff to find the new version
+        console.log('\nCreating temporary tag for changelog generation...');
+        const tempTagName = `v${newVersion}-temp`;
+        run(`git tag -a ${tempTagName} -m "Temporary tag for v${newVersion}"`);
+
+        // Now generate the changelog with the temporary tag in place
         console.log('\nUpdating changelog...');
         run('npm run changelog');
+
+        // Remove temporary tag after changelog is generated
+        console.log('\nRemoving temporary tag...');
+        run(`git tag -d ${tempTagName}`);
 
         // Create release notes specifically for this version
         await createReleaseNotes(newVersion);
 
         // Git operations
-        console.log('\nCommitting changes...');
-        run(`git add package.json CHANGELOG.md RELEASENOTES.md`);
-        run(`git commit -m "chore: release v${newVersion}"`);
+        console.log('\nCommitting changelog...');
+        run(`git add CHANGELOG.md RELEASENOTES.md`);
+        run(`git commit -m "chore: update changelog for v${newVersion}"`);
 
         console.log('\nCreating git tag...');
         run(`git tag -a v${newVersion} -m "Release v${newVersion}"`);
