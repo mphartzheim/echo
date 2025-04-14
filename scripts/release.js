@@ -20,7 +20,7 @@ const prompt = (question) => new Promise((resolve) => rl.question(question, reso
 // Helper function to run a command and return stdout
 const run = (cmd, options = {}) => {
     console.log(`> ${cmd}`);
-    return execSync(cmd, { encoding: 'utf-8', stdio: 'inherit', ...options });
+    return execSync(cmd, { encoding: 'utf8', stdio: 'inherit', ...options });
 };
 
 // Function to extract the latest version's changes from CHANGELOG.md
@@ -30,19 +30,25 @@ async function createReleaseNotes(version) {
     try {
         const changelog = await fs.readFile(path.join(rootDir, 'CHANGELOG.md'), 'utf8');
 
-        // Look for the current version header
-        const versionHeaderRegex = new RegExp(`## \\[${version}\\] - \\d{4}-\\d{2}-\\d{2}`);
-        const versionMatch = changelog.match(versionHeaderRegex);
-
+        // Look for the current version header - also check for -temp suffix
+        const tempVersion = `${version}-temp`;
+        let versionHeaderRegex = new RegExp(`## \\[${version}\\] - \\d{4}-\\d{2}-\\d{2}`);
+        let versionMatch = changelog.match(versionHeaderRegex);
+        
+        // If normal version isn't found, try the temp version
         if (!versionMatch) {
-            throw new Error(`Could not find version ${version} in the changelog`);
+            versionHeaderRegex = new RegExp(`## \\[${tempVersion}\\] - \\d{4}-\\d{2}-\\d{2}`);
+            versionMatch = changelog.match(versionHeaderRegex);
+            if (!versionMatch) {
+                throw new Error(`Could not find version ${version} or ${tempVersion} in the changelog`);
+            }
         }
 
         const versionIndex = changelog.indexOf(versionMatch[0]);
         let endIndex;
 
         // Find the next version header or end of file
-        const nextVersionMatch = changelog.slice(versionIndex + versionMatch[0].length).match(/\n## \[\d+\.\d+\.\d+\]/);
+        const nextVersionMatch = changelog.slice(versionIndex + versionMatch[0].length).match(/\n## \[\d+\.\d+\.\d+/);
         if (nextVersionMatch) {
             endIndex = versionIndex + versionMatch[0].length + nextVersionMatch.index;
         } else {
@@ -63,6 +69,24 @@ async function createReleaseNotes(version) {
 
     } catch (error) {
         console.error('Error creating release notes:', error);
+        throw error;
+    }
+}
+
+// Function to fix the changelog by replacing temporary version with actual version
+async function fixChangelog(tempVersion, actualVersion) {
+    try {
+        console.log(`\nFixing changelog: replacing ${tempVersion} with ${actualVersion}...`);
+        const changelogPath = path.join(rootDir, 'CHANGELOG.md');
+        let changelog = await fs.readFile(changelogPath, 'utf8');
+        
+        // Replace [version-temp] with [version]
+        changelog = changelog.replace(`[${tempVersion}]`, `[${actualVersion}]`);
+        
+        await fs.writeFile(changelogPath, changelog);
+        console.log('✅ Changelog fixed successfully');
+    } catch (error) {
+        console.error('Error fixing changelog:', error);
         throw error;
     }
 }
@@ -111,6 +135,9 @@ async function release() {
         // Now generate the changelog with the temporary tag in place
         console.log('\nUpdating changelog...');
         run('npm run changelog');
+        
+        // Fix the changelog to replace the temp version with the actual version
+        await fixChangelog(`${newVersion}-temp`, newVersion);
 
         // Remove temporary tag after changelog is generated
         console.log('\nRemoving temporary tag...');

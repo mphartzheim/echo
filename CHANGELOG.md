@@ -2,11 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## [unreleased]
+## [1.1.6] - 2025-04-14
 
 ### ⚙️ Miscellaneous Tasks
 
 - Automation updates - fix windows release
+- Fix releasenotes automation
+- Bump version to 1.1.6
 
 ## [1.1.4] - 2025-04-14
 
