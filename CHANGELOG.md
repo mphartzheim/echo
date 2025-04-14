@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [unreleased]
 
+### ⚙️ Miscellaneous Tasks
+
+- V1.1.1 updates
+
+## [1.1.1] - 2025-04-14
+
 ### 🚀 Features
 
 - Refactor forecast loading to use pointData and render helpers
@@ -14,6 +20,7 @@ All notable changes to this project will be documented in this file.
 
 - Update changelog for v1.0.1 release
 - Build automations
+- Release v1.1.1
 
 ## [1.0.1] - 2025-04-07
 
