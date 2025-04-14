@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - 2025-04-14
+
+### 🚀 Features
+
+- Refactor forecast loading to use pointData and render helpers
+
+### ⚙️ Miscellaneous Tasks
+
+- Update changelog for v1.0.1 release
+
 ## [1.0.1] - 2025-04-07
 
 ### 🚀 Features

@@ -1,6 +1,6 @@
 import { fetchPointData, updateForecastHeaderWithPointData, updateCurrentConditionsWithPointData } from './forecast.js';
 import { renderFavorites, pinCurrentLocation, editFavorite, deleteFavorite } from './favorites.js';
-import { updateRadarLayer } from './radar.js';
+import { updateRadarLayer, displayAlertPolygons } from './radar.js';
 import { copyForecastLimited, copyAlerts } from './clipboard.js';
 import { searchLocation } from './search.js';
 import { openSpcWindow } from './spc.js';
@@ -10,7 +10,6 @@ import { renderForecastToContainer, renderAlertsToContainer } from './render.js'
 let map;
 let selectedLocation = null;
 let currentFavorites = [];
-let currentMarker = null;
 
 window.addEventListener('DOMContentLoaded', async () => {
   // Initialize Leaflet map and expose globally
@@ -38,6 +37,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   window.copyAlerts = copyAlerts;
   window.openSpcWindow = openSpcWindow;
 
+  // Create a shared marker reference object that will be consistent across function calls
+  const currentMarkerRef = { value: null };
+
   // Load favorites
   try {
     currentFavorites = await window.api.loadFavorites();
@@ -49,6 +51,19 @@ window.addEventListener('DOMContentLoaded', async () => {
   } catch (err) {
     console.error('Error loading favorites:', err);
   }
+
+  // Define searchLocation globally to make it accessible from HTML button click
+  window.searchLocation = () => {
+    searchLocation(
+      map,
+      currentMarkerRef,
+      (lat, lon) => { selectedLocation = { lat, lng: lon }; },
+      renderForecastToContainer,
+      renderAlertsToContainer,
+      updateForecastHeaderWithPointData,
+      updateCurrentConditionsWithPointData
+    );
+  };
 
   // 🟢 Attach click handler now that DOM + map are ready
   map.on('click', async function (e) {
@@ -79,13 +94,13 @@ window.addEventListener('DOMContentLoaded', async () => {
     console.log("Spinner should be visible now.", spinner);
 
     // Remove any existing marker.
-    if (currentMarker) {
-      map.removeLayer(currentMarker);
+    if (currentMarkerRef.value) {
+      map.removeLayer(currentMarkerRef.value);
       console.log("Existing marker removed.");
     }
 
     try {
-      currentMarker = L.marker([selectedLocation.lat, selectedLocation.lng]).addTo(map);
+      currentMarkerRef.value = L.marker([selectedLocation.lat, selectedLocation.lng]).addTo(map);
       console.log("Marker added at:", selectedLocation);
 
       // Force browser to repaint the spinner.
@@ -102,6 +117,9 @@ window.addEventListener('DOMContentLoaded', async () => {
 
       const activeAlerts = await window.api.fetchAlerts(selectedLocation.lat, selectedLocation.lng);
       console.log("Active alerts data received:", activeAlerts);
+
+      // Display alert polygons on the map
+      displayAlertPolygons(map, activeAlerts);
 
       const pointData = await fetchPointData(selectedLocation.lat, selectedLocation.lng);
 
@@ -126,16 +144,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById("locationSearch").addEventListener("keydown", function (event) {
     if (event.key === "Enter") {
       event.preventDefault();
-
-      // Only needs to set selectedLocation now — everything else happens inside search.js
-      window.searchLocation = () =>
-        searchLocation(
-          map,
-          { value: currentMarker },
-          (lat, lon) => { selectedLocation = { lat, lng: lon }; }
-        );
-
-      window.searchLocation(); // Trigger search immediately
+      window.searchLocation(); // Use the globally defined function
     }
   });
 
@@ -166,64 +175,68 @@ window.addEventListener('DOMContentLoaded', async () => {
       }
     });
   }
-});
 
-// Jump to favorite and fetch data
-window.goToFavorite = async function (lat, lng) {
-  selectedLocation = { lat, lng };
-  map.setView([lat, lng], 10);
+  // Make goToFavorite use the same markerRef object
+  window.goToFavorite = async function (lat, lng) {
+    selectedLocation = { lat, lng };
+    map.setView([lat, lng], 10);
 
-  const forecastDiv = document.getElementById('forecast');
-  const alertsDiv = document.getElementById('alerts');
+    const forecastDiv = document.getElementById('forecast');
+    const alertsDiv = document.getElementById('alerts');
 
-  // Ensure the spinner exists; if not, create it and prepend to forecastDiv.
-  let spinner = document.getElementById('forecast-loading');
-  if (!spinner) {
-    spinner = document.createElement('div');
-    spinner.id = 'forecast-loading';
-    spinner.classList.add('spinner', 'hidden');
-    forecastDiv.prepend(spinner);
-  }
-
-  // Remove all forecast content except the spinner.
-  Array.from(forecastDiv.children).forEach(child => {
-    if (child.id !== 'forecast-loading') {
-      child.remove();
+    // Ensure the spinner exists; if not, create it and prepend to forecastDiv.
+    let spinner = document.getElementById('forecast-loading');
+    if (!spinner) {
+      spinner = document.createElement('div');
+      spinner.id = 'forecast-loading';
+      spinner.classList.add('spinner', 'hidden');
+      forecastDiv.prepend(spinner);
     }
-  });
-  // Clear alerts container normally.
-  alertsDiv.innerHTML = '';
 
-  if (currentMarker) {
-    map.removeLayer(currentMarker);
-  }
+    // Remove all forecast content except the spinner.
+    Array.from(forecastDiv.children).forEach(child => {
+      if (child.id !== 'forecast-loading') {
+        child.remove();
+      }
+    });
+    // Clear alerts container normally.
+    alertsDiv.innerHTML = '';
 
-  currentMarker = L.marker([lat, lng]).addTo(map);
+    if (currentMarkerRef.value) {
+      map.removeLayer(currentMarkerRef.value);
+    }
 
-  // Show the spinner.
-  spinner.classList.remove("hidden");
-  // Force a repaint by yielding to the event loop.
-  await new Promise(resolve => setTimeout(resolve, 0));
+    currentMarkerRef.value = L.marker([lat, lng]).addTo(map);
 
-  try {
-    const weatherForecast = await window.api.fetchWeather(lat, lng);
-    const activeAlerts = await window.api.fetchAlerts(lat, lng);
-    const pointData = await fetchPointData(lat, lng);
-    await Promise.all([
-      updateForecastHeaderWithPointData(pointData),
-      updateCurrentConditionsWithPointData(pointData)
-    ]);
+    // Show the spinner.
+    spinner.classList.remove("hidden");
+    // Force a repaint by yielding to the event loop.
+    await new Promise(resolve => setTimeout(resolve, 0));
 
-    renderForecastToContainer(forecastDiv, weatherForecast);
-    renderAlertsToContainer(alertsDiv, activeAlerts);
+    try {
+      const weatherForecast = await window.api.fetchWeather(lat, lng);
+      const activeAlerts = await window.api.fetchAlerts(lat, lng);
 
-  } catch (err) {
-    console.error('Error fetching weather or alerts for favorite:', err);
-  } finally {
-    // Hide the spinner.
-    spinner.classList.add("hidden");
-  }
-};
+      // Display alert polygons on the map
+      displayAlertPolygons(map, activeAlerts);
+
+      const pointData = await fetchPointData(lat, lng);
+      await Promise.all([
+        updateForecastHeaderWithPointData(pointData),
+        updateCurrentConditionsWithPointData(pointData)
+      ]);
+
+      renderForecastToContainer(forecastDiv, weatherForecast);
+      renderAlertsToContainer(alertsDiv, activeAlerts);
+
+    } catch (err) {
+      console.error('Error fetching weather or alerts for favorite:', err);
+    } finally {
+      // Hide the spinner.
+      spinner.classList.add("hidden");
+    }
+  };
+});
 
 window.copyForecast3 = function () {
   copyForecastLimited(3);
